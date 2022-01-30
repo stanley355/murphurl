@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
+mod db;
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct RequestURL {
   origin_url: String,
@@ -19,7 +21,9 @@ pub struct ResponseURL {
 }
 
 /// extract `Info` using serde
-pub async fn shorten_url(req: web::Json<RequestURL>) -> Result<impl Responder> {
+pub async fn main(req: web::Json<RequestURL>) -> Result<impl Responder> {
+  db::create_table().expect("Fail to create table");
+
   let mut res = ResponseURL {
     origin_url: req.origin_url.clone(),
     hashed_url: "".to_string(),
