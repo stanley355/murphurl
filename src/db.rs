@@ -1,7 +1,10 @@
 use postgres::{Client, NoTls, Error};
+use dotenv::dotenv;
+use std::env;
 
 pub fn connect_pg() -> Result<(), Error> {
-    let mut client = Client::connect("postgresql://postgres:password@localhost/postgres", NoTls)?;
+    dotenv().ok();
+    let mut client = Client::connect(&env::var("PG_URL").unwrap(), NoTls)?;
     
     client.batch_execute("
         CREATE TABLE IF NOT EXISTS author (
