@@ -1,43 +1,32 @@
 use actix_web::{web, Responder, Result};
-use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
 mod db;
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct RequestURL {
-  origin_url: String,
-  custom_url: String,
-  // expired_date: String,
-}
-
-#[derive(Serialize, Debug)]
-pub struct ResponseURL {
-  origin_url: String,
-  hashed_url: String,
-  custom_url: String,
-  // expired_date: String,
-}
+mod structs;
 
 /// extract `Info` using serde
-pub async fn main(req: web::Json<RequestURL>) -> Result<impl Responder> {
-  db::create_table().expect("Fail to create table");
+pub async fn main(req: web::Json<structs::RequestURL>) -> Result<impl Responder> {
+  db::create_table().expect("Failed to create table");
 
-  let mut res = ResponseURL {
+  let mut res = structs::ResponseURL {
     origin_url: req.origin_url.clone(),
     hashed_url: "".to_string(),
     custom_url: "".to_string(),
-    // expired_date: String::from(""),
+    expired_date: "".to_string(),
   };
 
   if req.custom_url == "" {
     let hash: String = hash_url(req.origin_url.clone()); 
     res.origin_url = hash;
+    db::insert_url_data(res.clone()).expect("Failed to insert url data");
+    
   } else {
     res.custom_url = req.custom_url.clone();
+    db::insert_url_data(res.clone()).expect("Failed to insert url data");
   }
   return Ok(web::Json(res))
+  
 }
 
 pub fn hash_url(url: String) -> String {
