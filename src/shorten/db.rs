@@ -18,9 +18,9 @@ pub fn create_table() -> Result<(), Error> {
         custom_url VARCHAR(50)
     )";
 
-    client.batch_execute(&query)?;
+    client.batch_execute(&query).expect("Failed to create table");
     client.close()?;
-    return Ok(println!("Shortenurl table is working"));
+    return Ok(());
 }
 
 pub fn insert_url_data(params: structs::ResponseURL) -> Result<(), Error> {
