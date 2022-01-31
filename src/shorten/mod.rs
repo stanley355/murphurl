@@ -41,7 +41,7 @@ pub fn hash_url(url: String) -> String {
 
 fn check_existing_data(mut res: structs::ResponseURL) -> structs::ResponseURL {
   let db_data = db::check_url_data(res.clone()).expect("Fail to check");
-
+  
   if db_data.origin_url == res.origin_url {
     res = db_data;
   } else {

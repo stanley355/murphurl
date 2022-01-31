@@ -42,8 +42,8 @@ pub fn insert_url_data(params: structs::ResponseURL) -> Result<(), Error> {
 pub fn check_url_data(params: structs::ResponseURL) -> Result<structs::ResponseURL, Error> {
     let mut client = connect_pg().expect("Can't connect to db");
 
-    let query = "SELECT * FROM shortenurl WHERE origin_url = $1 OR hashed_url = $2 OR custom_url = $3";
-    let url_row = client.query(query, &[&params.origin_url, &params.hashed_url, &params.custom_url]).unwrap();
+    let query = "SELECT * FROM shortenurl WHERE origin_url = $1";
+    let url_row = client.query(query, &[&params.origin_url]).unwrap();
 
     client.close()?;
 
