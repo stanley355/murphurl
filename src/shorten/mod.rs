@@ -9,30 +9,21 @@ mod structs;
 pub async fn main(req: web::Json<structs::RequestURL>) -> Result<impl Responder> {
   db::create_table().expect("Failed to create table");
 
-  let mut res = structs::ResponseURL {
+  let res = structs::ResponseURL {
     origin_url: req.origin_url.clone(),
-    hashed_url: "".to_string(),
-    custom_url: "".to_string(),
+    hashed_url: hash_url(req.origin_url.clone()),
+    custom_url: req.custom_url.clone(),
   };
 
-  if req.custom_url == "" {
-    let hash: String = hash_url(req.origin_url.clone()); 
-    res.hashed_url = hash;
-    db::check_url_data(res.clone()).expect("Fail to check");
-    db::insert_url_data(res.clone()).expect("Failed to insert url data");
-    
-  } else {
-    res.custom_url = req.custom_url.clone();
-    db::insert_url_data(res.clone()).expect("Failed to insert url data");
-  }
-  return Ok(web::Json(res))
-  
+  let url_data = check_existing_data(res);
+
+  return Ok(web::Json(url_data));
 }
 
 pub fn hash_url(url: String) -> String {
   // create hashing to str
   let split_url = url.split('/').nth(2).unwrap().chars();
-  let first_char: String = split_url.clone().nth(0).unwrap().to_string(); 
+  let first_char: String = split_url.clone().nth(0).unwrap().to_string();
   let char_len: usize = split_url.clone().count(); //find the length of the main URL
   let last_char: String = split_url.clone().nth(char_len - 1).unwrap().to_string();
   let str_id: String = first_char + &last_char;
@@ -46,4 +37,16 @@ pub fn hash_url(url: String) -> String {
   let final_hash = str_id + &slice;
 
   return String::from(&final_hash);
+}
+
+fn check_existing_data(mut res: structs::ResponseURL) -> structs::ResponseURL {
+  let db_data = db::check_url_data(res.clone()).expect("Fail to check");
+
+  if db_data.origin_url == res.origin_url {
+    res = db_data;
+  } else {
+    db::insert_url_data(res.clone()).expect("Failed to insert url data");
+  }
+
+  return res;
 }

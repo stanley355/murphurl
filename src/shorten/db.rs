@@ -39,14 +39,26 @@ pub fn insert_url_data(params: structs::ResponseURL) -> Result<(), Error> {
     Ok(println!("Affected rows: {:?}", &insert_row))
 }
 
-pub fn check_url_data(params: structs::ResponseURL) -> Result<(), Error> {
+pub fn check_url_data(params: structs::ResponseURL) -> Result<structs::ResponseURL, Error> {
     let mut client = connect_pg().expect("Can't connect to db");
 
-    let query = "SELECT * FROM shortenurl WHERE origin_url = $1";
-    let url_row = client.query(query, &[&params.origin_url]).unwrap();
-    let rowa: String = url_row[0].get(1);
+    let query = "SELECT * FROM shortenurl WHERE origin_url = $1 OR hashed_url = $2 OR custom_url = $3";
+    let url_row = client.query(query, &[&params.origin_url, &params.hashed_url, &params.custom_url]).unwrap();
 
     client.close()?;
 
-    Ok(println!("The url_row: {:?}", rowa))
+    let mut data = structs::ResponseURL {
+        origin_url: "".to_string(),
+        hashed_url: "".to_string(),
+        custom_url: "".to_string()
+    };
+
+    if url_row.len() > 0 {
+        data.origin_url = url_row[0].get(1);
+        data.hashed_url = url_row[0].get(2);
+        data.custom_url = url_row[0].get(3);
+        return Ok(data);
+    } else {
+        return Ok(data);
+    }
 }
