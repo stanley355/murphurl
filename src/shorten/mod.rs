@@ -17,7 +17,8 @@ pub async fn main(req: web::Json<structs::RequestURL>) -> Result<impl Responder>
 
   if req.custom_url == "" {
     let hash: String = hash_url(req.origin_url.clone()); 
-    res.origin_url = hash;
+    res.hashed_url = hash;
+    db::check_url_data(res.clone()).expect("Fail to check");
     db::insert_url_data(res.clone()).expect("Failed to insert url data");
     
   } else {
