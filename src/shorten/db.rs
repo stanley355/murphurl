@@ -35,7 +35,6 @@ pub fn insert_url_data(params: structs::ResponseURL) -> Result<(), Error> {
             &params.origin_url,
             &params.hashed_url,
             &params.custom_url,
-            &params.expired_date,
         ],
     ).expect("Fail to execute shortenurl INSERT query");
 
@@ -43,3 +42,7 @@ pub fn insert_url_data(params: structs::ResponseURL) -> Result<(), Error> {
 
     Ok(println!("Affected rows: {:?}", insert_row))
 }
+
+// pub fn check_url_data(params: structs::ResponseURL) -> Result<(), Error> {
+
+// }

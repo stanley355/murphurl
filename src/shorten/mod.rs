@@ -13,7 +13,6 @@ pub async fn main(req: web::Json<structs::RequestURL>) -> Result<impl Responder>
     origin_url: req.origin_url.clone(),
     hashed_url: "".to_string(),
     custom_url: "".to_string(),
-    expired_date: "".to_string(),
   };
 
   if req.custom_url == "" {
