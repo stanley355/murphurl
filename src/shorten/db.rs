@@ -16,15 +16,10 @@ pub fn create_table() -> Result<(), Error> {
         origin_url VARCHAR(255) NOT NULL,
         hashed_url VARCHAR(50),
         custom_url VARCHAR(50),
-        expired_date VARCHAR(50)
     )";
 
-    client
-        .batch_execute(&query)
-        .expect("Fail to create shortenurl Table");
-    client
-        .close()
-        .expect("Fail to close  connection on create shortenurl Table");
+    client.batch_execute(&query)?;
+    client.close()?;
     return Ok(println!("Shortenurl table is working"));
 }
 
@@ -34,7 +29,7 @@ pub fn insert_url_data(params: structs::ResponseURL) -> Result<(), Error> {
     let query = "INSERT INTO shortenurl (origin_url, hashed_url, custom_url, expired_date)
     VALUES ($1, $2, $3, $4) RETURNING id";
 
-    let insert = client.execute(
+    let insert_row = client.execute(
         query,
         &[
             &params.origin_url,
@@ -42,8 +37,9 @@ pub fn insert_url_data(params: structs::ResponseURL) -> Result<(), Error> {
             &params.custom_url,
             &params.expired_date,
         ],
-    );
-    client.close().expect("Fail to close connection after inserting shortenurl query");
+    ).expect("Fail to execute shortenurl INSERT query");
 
-    Ok(println!("Affected rows: {:?}", insert.unwrap()))
+    client.close()?;
+
+    Ok(println!("Affected rows: {:?}", insert_row))
 }
