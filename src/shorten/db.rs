@@ -1,5 +1,5 @@
-use dotenv::dotenv;
 use postgres::{Client, Error, NoTls};
+use dotenv::dotenv;
 use std::env;
 
 use crate::shorten::structs;
