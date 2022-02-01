@@ -9,11 +9,11 @@ mod structs;
 pub async fn main(req: web::Json<structs::RequestURL>) -> Result<impl Responder> {
   db::create_table().expect("Failed to create table");
 
-  let res = structs::ResponseURL {
+  let res = Box::new(structs::ResponseURL {
     origin_url: req.origin_url.clone(),
     hashed_url: hash_url(&req.origin_url),
     custom_url: req.custom_url.clone(),
-  };
+  });
 
   let url_data = check_existing_data(res);
 
@@ -25,7 +25,7 @@ pub fn hash_url(url: &String) -> String {
   let mut split_url = url.split('/').nth(2).unwrap().chars();
   let first_char: String = split_url.clone().nth(0).unwrap().to_string();
   let char_len: usize = split_url.clone().count(); //find the length of the main URL
-  let last_char: &String = &split_url.nth(char_len - 1).unwrap().to_string();
+  let last_char: &String = &split_url.nth(&char_len - 1).unwrap().to_string();
   let str_id: String = first_char + &last_char;
 
   // create random number and slice the first to fourth chars
@@ -38,7 +38,7 @@ pub fn hash_url(url: &String) -> String {
   return String::from(&final_hash);
 }
 
-fn check_existing_data(mut res: structs::ResponseURL) -> structs::ResponseURL {
+fn check_existing_data(mut res: Box<structs::ResponseURL>) -> Box<structs::ResponseURL> {
   let db_data = db::check_url_data(res.clone()).expect("Fail to check");
   if db_data.origin_url == res.origin_url {
     res = db_data;
