@@ -28,7 +28,7 @@ pub fn create_table() -> Result<(), Error> {
     return Ok(());
 }
 
-pub fn insert_url_data(params: Box<structs::ResponseURL>) -> Result<(), Error> {
+pub fn insert_new_url(params: Box<structs::ResponseURL>) -> Result<(), Error> {
     let mut client = connect_pg().expect("Can't connect to db");
 
     let query =
@@ -44,21 +44,33 @@ pub fn insert_url_data(params: Box<structs::ResponseURL>) -> Result<(), Error> {
     Ok(println!("Affected rows: {:?}", &insert_row))
 }
 
-pub fn check_url_data(
+pub fn check_existing_url(
     params: Box<structs::ResponseURL>,
 ) -> Result<Box<structs::ResponseURL>, Error> {
     let mut client = connect_pg().expect("Can't connect to db");
-
-    let query = Box::new("SELECT * FROM shortenurl WHERE origin_url = $1");
-    let url_row = Box::new(client.query(*query, &[&params.origin_url]).unwrap());
-
-    client.close()?;
 
     let mut data = Box::new(structs::ResponseURL {
         origin_url: "".to_string(),
         hashed_url: "".to_string(),
         custom_url: "".to_string(),
     });
+
+    let query: Box<_>;
+    let url_row: Box<_>;
+
+    if params.origin_url == "" {
+        query = Box::new("SELECT * FROM shortenurl WHERE hashed_url = $1 OR custom_url = $2");
+        url_row = Box::new(
+            client
+                .query(*query, &[&params.hashed_url, &params.custom_url])
+                .unwrap(),
+        );
+    } else {
+        query = Box::new("SELECT * FROM shortenurl WHERE origin_url = $1");
+        url_row = Box::new(client.query(*query, &[&params.origin_url]).unwrap());
+    }
+
+    client.close()?;
 
     if url_row.len() > 0 {
         data.origin_url = url_row[0].get(1);

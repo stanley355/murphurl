@@ -1,12 +1,12 @@
-use actix_web::{web, Responder, Result};
+use actix_web::{web, Responder, Result, HttpRequest};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
 mod db;
 mod structs;
 
-/// extract `Info` using serde
-pub async fn main(req: web::Json<structs::RequestURL>) -> Result<impl Responder> {
+// Create shortened url
+pub async fn shorten_url(req: web::Json<structs::RequestURL>) -> Result<impl Responder> {
   db::create_table().expect("Failed to create table");
 
   let res = Box::new(structs::ResponseURL {
@@ -15,12 +15,12 @@ pub async fn main(req: web::Json<structs::RequestURL>) -> Result<impl Responder>
     custom_url: req.custom_url.clone(),
   });
 
-  let url_data = check_existing_data(res);
+  let url_data = check_existing_origin(res);
 
   return Ok(web::Json(url_data));
 }
 
-pub fn hash_url(url: &String) -> String {
+fn hash_url(url: &String) -> String {
   // create url identifier with the first and last char of the basepath
   let mut split_url = url.split('/').nth(2).unwrap().chars();
   let first_char: String = split_url.clone().nth(0).unwrap().to_string();
@@ -38,13 +38,28 @@ pub fn hash_url(url: &String) -> String {
   return String::from(&final_hash);
 }
 
-fn check_existing_data(mut res: Box<structs::ResponseURL>) -> Box<structs::ResponseURL> {
-  let db_data = db::check_url_data(res.clone()).expect("Fail to check");
+fn check_existing_origin(mut res: Box<structs::ResponseURL>) -> Box<structs::ResponseURL> {
+  let db_data = db::check_existing_url(res.clone()).expect("Fail to check");
   if db_data.origin_url == res.origin_url {
     res = db_data;
   } else {
-    db::insert_url_data(res.clone()).expect("Failed to insert url data");
+    db::insert_new_url(res.clone()).expect("Failed to insert url data");
   }
 
   return res;
+}
+
+// Check existing shortened url
+pub async fn find_shorten_url(req: HttpRequest) -> Result<impl Responder> {
+  let url = req.match_info().get("url");
+
+  let res = Box::new(structs::ResponseURL {
+    origin_url: "".to_string(),
+    hashed_url: url.unwrap().to_string(),
+    custom_url: url.unwrap().to_string(),
+  });
+
+  let db_data = db::check_existing_url(res.clone()).expect("Fail to check");
+
+  return Ok(web::Json(db_data));
 }
