@@ -8,16 +8,14 @@ mod shorten;
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
-    for (key, value) in env::vars() {
-        println!("{}: {}", key, value);
-    }
+    let host_port = env::var("HOST").unwrap() + ":" + &env::var("PORT").unwrap();
 
     HttpServer::new(|| {
         App::new()
             .route("/v1/{url}", web::get().to(shorten::find_shorten_url))
             .route("/v1", web::post().to(shorten::shorten_url))
     })
-    .bind(&env::var("PORT").unwrap())?
+    .bind(host_port)?
     .run()
     .await
 }
