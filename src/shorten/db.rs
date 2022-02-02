@@ -1,12 +1,18 @@
 use dotenv::dotenv;
-use postgres::{Client, Error, NoTls};
+use openssl::ssl::{SslConnector, SslMethod};
+use postgres::{Client, Error};
+use postgres_openssl::MakeTlsConnector;
 use std::env;
 
 use crate::shorten::structs;
 
 fn connect_pg() -> Result<Box<Client>, Error> {
     dotenv().ok();
-    let client = Box::new(Client::connect(&env::var("PG_URL").unwrap(), NoTls)?);
+    let mut builder = SslConnector::builder(SslMethod::tls()).expect("Ssl connector error");
+    builder.set_ca_file("database_cert.pem").expect("SSL set_ca_file error");
+    let connector = MakeTlsConnector::new(builder.build());
+
+    let client = Box::new(Client::connect(&env::var("PG_URL").unwrap(), connector)?);
     return Ok(client);
 }
 
