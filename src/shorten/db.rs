@@ -1,15 +1,18 @@
 use dotenv::dotenv;
-use openssl::ssl::{SslConnector, SslMethod};
+use std::env;
+
+use openssl::ssl::{SslConnector, SslMethod, SslVerifyMode};
 use postgres::{Client, Error};
 use postgres_openssl::MakeTlsConnector;
-use std::env;
 
 use crate::shorten::structs;
 
 fn connect_pg() -> Result<Box<Client>, Error> {
     dotenv().ok();
-    let mut builder = SslConnector::builder(SslMethod::tls()).expect("Ssl connector error");
-    builder.set_ca_file("database_cert.pem").expect("SSL set_ca_file error");
+
+    // Create Ssl postgres connector without verification as required to connect to Heroku.
+    let mut builder = SslConnector::builder(SslMethod::tls()).unwrap();
+    builder.set_verify(SslVerifyMode::NONE);
     let connector = MakeTlsConnector::new(builder.build());
 
     let client = Box::new(Client::connect(&env::var("PG_URL").unwrap(), connector)?);
