@@ -8,6 +8,10 @@ mod shorten;
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
+    for (key, value) in env::vars() {
+        println!("{}: {}", key, value);
+    }
+
     HttpServer::new(|| {
         App::new()
             .route("/v1/{url}", web::get().to(shorten::find_shorten_url))
