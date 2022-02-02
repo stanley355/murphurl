@@ -1,4 +1,4 @@
-use actix_web::{web, Responder, Result, HttpRequest};
+use actix_web::{web, HttpRequest, Responder, Result};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
