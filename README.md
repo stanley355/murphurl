@@ -3,7 +3,7 @@ Powerful and Fastest Short URL creator built in Rust
 
 ## Docs
 1. To create shortened URL:
-POST: `https://morph.com/api/shortenurl`
+POST: `https://morph-shortenurl.herokuapp.com/v1`
 Body (JSON): {
   origin_url (String): https://... (Required),
   custom_url (String): https://... (Required, if you don't want to have any custom URL just put "" ),
@@ -16,4 +16,4 @@ Return (JSON): {
 }
 
 2. To share shortened URL:
-ENDPOINT: `https://morph.com/url/{url}` (where `{url}` is your hashed or custom URL )
+ENDPOINT: `https://morph-shortenurl.herokuapp.com/v1/{url}` (where `{url}` is your hashed or custom URL )
