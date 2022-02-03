@@ -8,14 +8,17 @@ mod shorten;
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
-    let host_port = env::var("HOST").unwrap() + ":" + &env::var("PORT").unwrap();
+    let address = env::var("HOST").unwrap() + ":" + &env::var("PORT").unwrap();
 
+    // to do: use app scope
     HttpServer::new(|| {
-        App::new()
-            .route("/v1/{url}", web::get().to(shorten::find_shorten_url))
-            .route("/v1", web::post().to(shorten::shorten_url))
+        App::new().service(
+            web::scope("/api")
+                .route("/v1", web::post().to(shorten::shorten_url)) //to create shorten URL
+                .route("/v1/{url}", web::get().to(shorten::find_shorten_url)), //to find origin URL
+        )
     })
-    .bind(host_port)?
+    .bind(address)?
     .run()
     .await
 }
