@@ -11,11 +11,11 @@ fn connect_pg() -> Result<Box<Client>, Error> {
     dotenv().ok();
 
     // Create Ssl postgres connector without verification as required to connect to Heroku.
-    let mut builder = SslConnector::builder(SslMethod::tls()).unwrap();
-    builder.set_verify(SslVerifyMode::NONE);
-    let connector = MakeTlsConnector::new(builder.build());
+    let mut ssl = SslConnector::builder(SslMethod::tls()).unwrap();
+    ssl.set_verify(SslVerifyMode::NONE);
+    let tls = MakeTlsConnector::new(ssl.build());
 
-    let client = Box::new(Client::connect(&env::var("PG_URL").unwrap(), connector)?);
+    let client = Box::new(Client::connect(&env::var("PG_URL").unwrap(), tls)?);
     return Ok(client);
 }
 
