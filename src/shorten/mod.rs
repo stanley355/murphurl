@@ -46,8 +46,11 @@ fn hash_url(url: &String) -> String {
 
 fn check_existing_origin(mut res: Box<structs::ResponseURL>) -> Box<structs::ResponseURL> {
   let db_data = db::check_existing_url(res.clone()).expect("Fail to check");
+  
   if db_data.origin_url == res.origin_url {
     res = db_data;
+  } else if res.hashed_url == "" {
+    res = res; //if hashed_url has empty string
   } else {
     db::insert_new_url(res.clone()).expect("Failed to insert url data");
   }
