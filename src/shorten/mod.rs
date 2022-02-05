@@ -9,9 +9,15 @@ mod structs;
 pub async fn shorten_url(req: web::Json<structs::RequestURL>) -> Result<impl Responder> {
   db::create_table().expect("Failed to create table");
 
+  // Error handling if user enters wrong URL
+  let hashed_url = match &req.origin_url.split('/').nth(2) {
+    Some(_) => hash_url(&req.origin_url),
+    None => "".to_string(),
+  };
+
   let res = Box::new(structs::ResponseURL {
     origin_url: req.origin_url.clone(),
-    hashed_url: hash_url(&req.origin_url),
+    hashed_url: hashed_url.to_string(),
     custom_url: req.custom_url.clone(),
   });
 
@@ -40,8 +46,11 @@ fn hash_url(url: &String) -> String {
 
 fn check_existing_origin(mut res: Box<structs::ResponseURL>) -> Box<structs::ResponseURL> {
   let db_data = db::check_existing_url(res.clone()).expect("Fail to check");
+  
   if db_data.origin_url == res.origin_url {
     res = db_data;
+  } else if res.hashed_url == "" {
+    res = res; //if hashed_url has empty string
   } else {
     db::insert_new_url(res.clone()).expect("Failed to insert url data");
   }
