@@ -27,3 +27,5 @@ Powerful and Fastest Short URL creator built in Rust
 -  hashed_url (String): [Some Hashed URL] (If you put custom_url, the hashed_url will return ""),
 -  custom_url (String): [Your Custom URL] (If you didn't put any custom_url, the custom_url will return ""),
 - }
+
+`Notes: Your origin_url should have http or https, invalid URL will return "" in hashed or custom URL`
