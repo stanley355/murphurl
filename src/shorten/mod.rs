@@ -9,9 +9,15 @@ mod structs;
 pub async fn shorten_url(req: web::Json<structs::RequestURL>) -> Result<impl Responder> {
   db::create_table().expect("Failed to create table");
 
+  // Error handling if user enters wrong URL
+  let hashed_url = match &req.origin_url.split('/').nth(2) {
+    Some(_) => hash_url(&req.origin_url),
+    None => "".to_string(),
+  };
+
   let res = Box::new(structs::ResponseURL {
     origin_url: req.origin_url.clone(),
-    hashed_url: hash_url(&req.origin_url),
+    hashed_url: hashed_url.to_string(),
     custom_url: req.custom_url.clone(),
   });
 
