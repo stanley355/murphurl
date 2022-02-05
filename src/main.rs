@@ -8,7 +8,7 @@ mod shorten;
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
-    let address = env::var("HOST").unwrap() + ":" + &env::var("PORT").unwrap();
+    let address = format!("{}:{}", env::var("HOST").unwrap(), &env::var("PORT").unwrap());
 
     // to do: use app scope
     HttpServer::new(|| {
