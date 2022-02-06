@@ -19,24 +19,6 @@ fn connect_pg() -> Result<Box<Client>, Error> {
     return Ok(client);
 }
 
-pub fn create_table() -> Result<(), Error> {
-    let mut client = connect_pg().expect("Can't connect to db");
-    let query = Box::new(
-        "CREATE TABLE IF NOT EXISTS shortenurl (
-        id SERIAL PRIMARY kEY,
-        origin_url VARCHAR(255) NOT NULL,
-        hashed_url VARCHAR(50),
-        custom_url VARCHAR(50)
-    )",
-    );
-
-    client
-        .batch_execute(&query)
-        .expect("Failed to create table");
-    client.close()?;
-    return Ok(());
-}
-
 pub fn insert_new_url(params: Box<structs::ResponseURL>) -> Result<(), Error> {
     let mut client = connect_pg().expect("Can't connect to db");
 

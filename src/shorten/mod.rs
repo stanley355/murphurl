@@ -1,15 +1,24 @@
-use actix_web::{web, HttpRequest, Responder, Result};
+use actix_web::{web, HttpRequest, HttpResponse, Result, Error};
+use serde::{Deserialize};
+
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
 mod db;
 mod structs;
 
-// Create shortened url
-pub async fn shorten_url(req: web::Json<structs::RequestURL>) -> Result<impl Responder> {
-  db::create_table().expect("Failed to create table");
 
-  // Error handling if user enters wrong URL
+#[derive(Deserialize, Debug)]
+pub struct RequestURL {
+  origin_url: String,
+  custom_url: String,
+}
+
+
+// Create shortened url
+pub async fn shorten_url(req: web::Json<RequestURL>) -> Result<HttpResponse, Error> {
+
+  // Error handling if user enters invalid URL
   let hashed_url = match &req.origin_url.split('/').nth(2) {
     Some(_) => hash_url(&req.origin_url),
     None => "".to_string(),
@@ -23,7 +32,7 @@ pub async fn shorten_url(req: web::Json<structs::RequestURL>) -> Result<impl Res
 
   let url_data = check_existing_origin(res);
 
-  return Ok(web::Json(url_data));
+  return Ok(HttpResponse::Ok().json(url_data));
 }
 
 fn hash_url(url: &String) -> String {
@@ -59,7 +68,7 @@ fn check_existing_origin(mut res: Box<structs::ResponseURL>) -> Box<structs::Res
 }
 
 // Check existing shortened url
-pub async fn find_shorten_url(req: HttpRequest) -> Result<impl Responder> {
+pub async fn find_shorten_url(req: HttpRequest) -> Result<HttpResponse, Error> {
   let url = req.match_info().get("url");
 
   let res = Box::new(structs::ResponseURL {
@@ -70,5 +79,5 @@ pub async fn find_shorten_url(req: HttpRequest) -> Result<impl Responder> {
 
   let db_data = db::check_existing_url(res.clone()).expect("Fail to check");
 
-  return Ok(web::Json(db_data));
+  return Ok(HttpResponse::Ok().json(db_data));
 }
