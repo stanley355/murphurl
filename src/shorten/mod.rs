@@ -1,11 +1,16 @@
-use actix_web::{web, HttpRequest, HttpResponse, Result, Error};
+use actix_web::{web, HttpRequest, HttpResponse, Result};
 use serde::{Deserialize};
 
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
+use dotenv::dotenv;
+use std::env;
+
+use openssl::ssl::{SslConnector, SslMethod, SslVerifyMode};
+use postgres::{Client};
+use postgres_openssl::MakeTlsConnector;
 
 mod db;
 mod structs;
+mod utils;
 
 
 #[derive(Deserialize, Debug)]
@@ -16,17 +21,11 @@ pub struct RequestURL {
 
 
 // Create shortened url
-pub async fn shorten_url(req: web::Json<RequestURL>) -> Result<HttpResponse, Error> {
-
-  // Error handling if user enters invalid URL
-  let hashed_url = match &req.origin_url.split('/').nth(2) {
-    Some(_) => hash_url(&req.origin_url),
-    None => "".to_string(),
-  };
+pub async fn shorten_url(req: web::Json<RequestURL>) -> Result<HttpResponse, actix_web::Error> {
 
   let res = Box::new(structs::ResponseURL {
     origin_url: req.origin_url.clone(),
-    hashed_url: hashed_url.to_string(),
+    hashed_url: utils::hash_url(&req.origin_url),
     custom_url: req.custom_url.clone(),
   });
 
@@ -35,23 +34,6 @@ pub async fn shorten_url(req: web::Json<RequestURL>) -> Result<HttpResponse, Err
   return Ok(HttpResponse::Ok().json(url_data));
 }
 
-fn hash_url(url: &String) -> String {
-  // create url identifier with the first and last char of the basepath
-  let mut split_url = url.split('/').nth(2).unwrap().chars();
-  let first_char: String = split_url.clone().nth(0).unwrap().to_string();
-  let char_len: usize = split_url.clone().count(); //find the length of the main URL
-  let last_char: &String = &split_url.nth(&char_len - 1).unwrap().to_string();
-  let str_id: String = first_char + &last_char;
-
-  // create random number and slice the first to fourth chars
-  let mut hasher = DefaultHasher::new();
-  url.hash(&mut hasher);
-  let num_id = &hasher.finish().to_string();
-
-  let final_hash = str_id + &num_id[0..4];
-
-  return String::from(&final_hash);
-}
 
 fn check_existing_origin(mut res: Box<structs::ResponseURL>) -> Box<structs::ResponseURL> {
   let db_data = db::check_existing_url(res.clone()).expect("Fail to check");
@@ -68,7 +50,7 @@ fn check_existing_origin(mut res: Box<structs::ResponseURL>) -> Box<structs::Res
 }
 
 // Check existing shortened url
-pub async fn find_shorten_url(req: HttpRequest) -> Result<HttpResponse, Error> {
+pub async fn find_shorten_url(req: HttpRequest) -> Result<HttpResponse, actix_web::Error> {
   let url = req.match_info().get("url");
 
   let res = Box::new(structs::ResponseURL {
