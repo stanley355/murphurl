@@ -15,7 +15,7 @@ async fn main() -> std::io::Result<()> {
         App::new().service(
             web::scope("/api")
                 .route("/v1", web::post().to(shorten::shorten_url)) //to create shorten URL
-                .route("/v1/{url}", web::get().to(shorten::find_shorten_url)), //to find origin URL
+                // .route("/v1/{url}", web::get().to(shorten::find_shorten_url)), //to find origin URL
         )
     })
     .bind(address)?
