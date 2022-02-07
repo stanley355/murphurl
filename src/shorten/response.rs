@@ -44,7 +44,7 @@ impl ResponseURL {
     return Ok(Box::new(self));
   }
 
-  pub fn fetch_existing_url(
+  pub fn fetch_origin_url(
     mut self,
     mut client: Box<postgres::Client>,
   ) -> Result<Box<ResponseURL>, postgres::Error> {

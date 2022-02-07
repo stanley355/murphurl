@@ -48,7 +48,7 @@ pub async fn find_redirect_url(req: HttpRequest) -> Result<HttpResponse, actix_w
     custom_url: short_url.unwrap().to_string(),
   }); 
 
-  let url_data = res.fetch_existing_url(pg_client).unwrap();
+  let url_data = res.fetch_origin_url(pg_client).unwrap();
 
   return Ok(HttpResponse::Ok().json(url_data));
 }
