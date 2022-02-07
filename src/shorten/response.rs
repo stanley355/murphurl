@@ -28,7 +28,11 @@ impl ResponseURL {
     Ok(println!("Affected rows: {:?}", &result))
   }
 
-  pub fn verify_and_hash(mut self, mut client: Box<postgres::Client>) -> Box<ResponseURL> {
+  // Check if url exist in db, if not insert new one
+  pub fn verify_and_hash(
+    mut self,
+    mut client: Box<postgres::Client>,
+  ) -> Result<Box<ResponseURL>, postgres::Error> {
     let query = Box::new("SELECT * FROM shortenurl WHERE origin_url = $1");
     let existing_url = Box::new(client.query(*query, &[&self.origin_url]).unwrap());
 
@@ -37,11 +41,30 @@ impl ResponseURL {
       _ => self.hashed_url = existing_url[0].get(2),
     };
 
-    return Box::new(self);
+    return Ok(Box::new(self));
+  }
+
+  pub fn fetch_existing_url(
+    mut self,
+    mut client: Box<postgres::Client>,
+  ) -> Result<Box<ResponseURL>, postgres::Error> {
+    let query = Box::new("SELECT * FROM shortenurl WHERE hashed_url = $1 OR custom_url = $2");
+    let result = Box::new(
+      client
+        .query(*query, &[&self.hashed_url, &self.custom_url])
+        .unwrap(),
+    );
+
+    match result.len() {
+      0 => self.origin_url = "/".to_string(),
+      _ => self.origin_url = result[0].get(1)
+    }
+
+    return Ok(Box::new(self));
   }
 }
 
-// create random number and slice the first to sixth chars
+// Hash the origin_url and slice the first to sixth chars as the identifier
 pub fn hash_url(url: &String) -> String {
   let mut hasher = DefaultHasher::new();
   url.hash(&mut hasher);
