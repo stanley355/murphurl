@@ -19,7 +19,6 @@ jobs:
       - name: Docker setting
         run: docker rm -f $(docker ps -a -q)
         run: docker volume rm $(docker volume ls -q)
-        run: docker-compose up -d
         run: docker rmi $(docker images -a -q)
         
       - name: Build Docker image
