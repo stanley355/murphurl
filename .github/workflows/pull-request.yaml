@@ -15,6 +15,9 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+      - name: Remove existing docker image
+        run: docker system prune -a
+        
       - name: Build Docker image
         run: docker build -t registry.heroku.com/${{ secrets.HEROKU_APP }}/web:latest .
 
