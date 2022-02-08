@@ -15,8 +15,12 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - name: Remove existing docker image
-        run: docker system prune -a -y && docker rmi $(docker images -a -q)
+      - name: Docker setting
+        run: docker-compose down
+        run: docker rm -f $(docker ps -a -q)
+        run: docker volume rm $(docker volume ls -q)
+        run: docker-compose up -d
+        run: docker rmi $(docker images -a -q)
         
       - name: Build Docker image
         run: docker build -t registry.heroku.com/${{ secrets.HEROKU_APP }}/web:latest .
