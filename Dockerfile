@@ -14,4 +14,7 @@ WORKDIR /app
 
 COPY --from=builder /app/target/release/shortenurl ./
 
-CMD ["/app/shortenurl"]
+RUN adduser -D stan
+USER stan
+
+CMD ["./app/shortenurl"]
