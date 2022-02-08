@@ -14,4 +14,4 @@ WORKDIR /app
 
 COPY --from=builder /app/target/release/shortenurl ./
 
-CMD ["./app/shortenurl"]
+CMD ["/app/shortenurl"]
