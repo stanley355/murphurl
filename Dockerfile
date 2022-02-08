@@ -13,4 +13,4 @@ COPY --from=builder /target/release/shortenurl ./
 RUN adduser -D stan
 USER stan
 
-CMD ["/shortenurl"]
+CMD ["web", "shortenurl"]
