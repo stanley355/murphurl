@@ -1,0 +1,36 @@
+name: Release Build pipleine
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_test:
+    name: Rust shorten url project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Build Docker image
+        run: docker build -t registry.heroku.com/${{ secrets.HEROKU_APP }}/web:latest .
+
+      - name: Docker image info
+        run: docker images
+      
+      - name: Login to container registry
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_TOKEN }}
+        run: heroku container:login
+
+      - name: Push Docker image
+        # see here for the details of the release phase https://devcenter.heroku.com/articles/container-registry-and-runtime#release-phase
+        run: docker push registry.heroku.com/${{ secrets.HEROKU_APP }}/web
+
+      - name: Release
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_TOKEN }}
+        run: heroku container:release -a ${{ secrets.HEROKU_APP }} web
