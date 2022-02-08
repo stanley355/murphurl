@@ -1,9 +1,8 @@
-name: Pull request pipeline
+name: Staging Build pipleine
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
       - develop
 
 jobs:
@@ -15,7 +14,6 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          
       - name: Build Docker image
         run: docker build -t registry.heroku.com/${{ secrets.HEROKU_APP }}/web:latest .
 
