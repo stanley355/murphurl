@@ -27,4 +27,6 @@ WORKDIR /myapp
 # Copy our build
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/shortenurl ./
 
+RUN ls
+
 CMD ["/app/shortenurl"]
