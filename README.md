@@ -3,12 +3,12 @@ Powerful and Fastest Short URL creator built in Rust
 
 ## Docs
 1. To create shortened URL:
-- Endpoint (POST): `https://marph.herokuapp.com/api/shortenurl`
-- Request Body (JSON):
-- {
--  origin_url (String): https://... (Required),
--  custom_url (String): https://... (Required, if you don't want to have any custom URL just put "" ),
-- } 
+Endpoint (POST): `https://marph.herokuapp.com/api/shortenurl`\
+Request Body (JSON):\
+  {\
+    origin_url (String): https://... (Required),\
+    custom_url (String): https://... (Required, if you don't want to have any custom URL just put "" ),\
+  }\
 
 - Return body (JSON):
 - {
