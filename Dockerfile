@@ -11,7 +11,7 @@ WORKDIR /app
 
 COPY ./ .
 
-RUN cargo build --target x86_64-unknown-linux-musl --release --all-features
+RUN cargo build --release --all-features
 
 ####################################################################################################
 ## Final image
@@ -22,9 +22,9 @@ FROM alpine:latest
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/group /etc/group
 
-WORKDIR /myapp
+WORKDIR /app
 
 # Copy our build
-COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/shortenurl ./
+COPY --from=builder /app/target/release/shortenurl ./
 
 CMD ["ls && /app/shortenurl"]
