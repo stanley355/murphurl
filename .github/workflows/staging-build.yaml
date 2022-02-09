@@ -3,7 +3,6 @@ name: Release Build pipleine
 on:
   push:
     branches:
-      - main
       - develop
 
 jobs:
@@ -16,5 +15,8 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Build 
-        run: cargo build --release --all-features
+      - name: Build Docker image
+        run: docker build -t registry.heroku.com/${{ secrets.HEROKU_APP }}/web:latest .
+
+      - name: Docker image info
+        run: docker images
