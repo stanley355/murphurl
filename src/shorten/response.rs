@@ -17,7 +17,7 @@ pub struct ResponseURL {
 }
 
 impl ResponseURL {
-  pub fn insert_url_data(self, mut client: Box<postgres::Client>) -> Result<(), postgres::Error> {
+  pub fn insert_new_url(self, mut client: Box<postgres::Client>) -> Result<(), postgres::Error> {
     let query =
       Box::new("INSERT INTO shortenurl (origin_url, hashed_url, custom_url) VALUES ($1, $2, $3)");
     let result = client.execute(
@@ -37,7 +37,7 @@ impl ResponseURL {
     let existing_url = Box::new(client.query(*query, &[&self.origin_url]).unwrap());
 
     match existing_url.len() {
-      0 => self.clone().insert_url_data(client).unwrap(),
+      0 => self.clone().insert_new_url(client).unwrap(),
       _ => self.hashed_url = existing_url[0].get(2),
     };
 
@@ -57,7 +57,23 @@ impl ResponseURL {
 
     match result.len() {
       0 => self.origin_url = "/".to_string(),
-      _ => self.origin_url = result[0].get(1)
+      _ => {
+        let origin_url: String = result[0].get(1);
+
+        // Redirection count logic
+        let update_query = Box::new(
+          "UPDATE shortenurl SET redirection_count = redirection_count + 1 WHERE origin_url = $1 ",
+        );
+        let update_result = Box::new(
+          client
+            .execute(&update_query.to_string(), &[&origin_url])
+            .unwrap(),
+        );
+        println!("Affected rows: {:?}", &update_result);
+
+        // Response
+        self.origin_url = origin_url;
+      }
     }
 
     return Ok(Box::new(self));
