@@ -10,8 +10,8 @@ async fn main() -> std::io::Result<()> {
 
     let address = format!(
         "{}:{}",
-        env::var("HOST").unwrap(),
-        &env::var("PORT").unwrap()
+        &env::var("HOST").unwrap_or("127.0.0.1".to_string()),
+        &env::var("PORT").unwrap_or("8080".to_string())
     );
 
     // to do: use app scope
