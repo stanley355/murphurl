@@ -7,7 +7,8 @@ use openssl::ssl::{SslConnector, SslMethod, SslVerifyMode};
 use postgres::Client;
 use postgres_openssl::MakeTlsConnector;
 
-mod response;
+mod model;
+mod utils;
 
 fn connect_pg() -> Result<Box<Client>, postgres::Error> {
   dotenv().ok();
@@ -23,13 +24,13 @@ fn connect_pg() -> Result<Box<Client>, postgres::Error> {
 
 // Create shortened url
 pub async fn shorten_url(
-  req: web::Json<response::RequestURL>,
+  req: web::Json<model::ModelURL>,
 ) -> Result<HttpResponse, actix_web::Error> {
 
   let pg_client = connect_pg().expect("Failed to connect to database");
-  let res = Box::new(response::ResponseURL {
+  let res = Box::new(model::ModelURL {
     origin_url: req.origin_url.clone(),
-    hashed_url: response::hash_url(&req.origin_url),
+    hashed_url: utils::hash_url(&req.origin_url),
     custom_url: req.custom_url.clone(),
   });
 
@@ -38,11 +39,11 @@ pub async fn shorten_url(
   return Ok(HttpResponse::Ok().json(url_data));
 }
 
-pub async fn find_redirect_url(req: HttpRequest) -> Result<HttpResponse, actix_web::Error> {
+pub async fn find_origin_url(req: HttpRequest) -> Result<HttpResponse, actix_web::Error> {
   let pg_client = connect_pg().expect("Failed to connect to database");
   let short_url = req.match_info().get("url");
   
-  let res = Box::new(response::ResponseURL {
+  let res = Box::new(model::ModelURL {
     origin_url: "".to_string(),
     hashed_url: short_url.unwrap().to_string(),
     custom_url: short_url.unwrap().to_string(),
