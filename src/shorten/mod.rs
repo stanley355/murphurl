@@ -40,7 +40,6 @@ pub async fn shorten_url(
 }
 
 pub async fn find_origin_url(req: HttpRequest) -> Result<HttpResponse, actix_web::Error> {
-  let pg_client = connect_pg().expect("Failed to connect to database");
   let short_url = req.match_info().get("url");
   
   let res = Box::new(model::ShortURL {
@@ -49,7 +48,7 @@ pub async fn find_origin_url(req: HttpRequest) -> Result<HttpResponse, actix_web
     custom_url: short_url.unwrap().to_string(),
   }); 
 
-  let url_data = res.fetch_origin_url(pg_client).unwrap();
+  let url_data = res.fetch_origin_url().unwrap();
 
   return Ok(HttpResponse::Ok().json(url_data));
 }

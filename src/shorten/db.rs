@@ -33,6 +33,7 @@ pub fn insert_payload(data: model::ShortURL) -> Result<u64, postgres::Error> {
 
   client.close()?;
 
+  println!("Affected rows: {:?}", result);
   return Ok(result);
 }
 
@@ -42,5 +43,27 @@ pub fn get_url_by_origin(data: model::ShortURL) -> Result<Row, Error> {
   let result = client.query_one(*query, &[&data.origin_url])?;
   client.close()?;
 
+  return Ok(result);
+}
+
+pub fn get_source_url(data: model::ShortURL) -> Result<Row, Error> {
+  let mut client = pg_client().unwrap();
+  let query = Box::new("SELECT * FROM shortenurl WHERE hashed_url = $1 OR custom_url = $2");
+  let result = client.query_one(*query, &[&data.hashed_url, &data.custom_url])?;
+  client.close()?;
+
+  return Ok(result);
+}
+
+pub fn update_redirection_count(data: model::ShortURL) -> Result<u64, Error> {
+  let mut client = pg_client().unwrap();
+  let query = Box::new(
+    "UPDATE shortenurl SET redirection_count = redirection_count + 1 WHERE origin_url = $1",
+  );
+
+  let result = client.execute(*query, &[&data.origin_url])?;
+  client.close()?;
+
+  println!("Affected rows: {:?}", result);
   return Ok(result);
 }
