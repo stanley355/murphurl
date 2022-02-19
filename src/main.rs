@@ -16,6 +16,7 @@ async fn main() -> std::io::Result<()> {
     App::new()
       .route("/api/v1", web::post().to(shorten::shorten_url))
       .route("/api/v1/{url}", web::get().to(shorten::find_origin_url))
+      .route("/api/v1/migrate", web::post().to(shorten::migrate_db))
   })
   .bind(address)?
   .run()

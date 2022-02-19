@@ -20,7 +20,21 @@ pub fn pg_client() -> Result<Box<Client>, Error> {
   return Ok(client);
 }
 
+pub fn create_db() {
+  let mut client = pg_client().unwrap();
+  let query = Box::new(
+    "CREATE TABLE IF NOT EXISTS shortenurl (
+      id SERIAL PRIMARY kEY,
+      origin_url VARCHAR(255) NOT NULL,
+      hashed_url VARCHAR(50),
+      custom_url VARCHAR(50),
+      redirection_count INT DEFAULT 0
+  )",
+  );
 
+  client.batch_execute(*query).expect("Fail to create DB");
+  client.close().unwrap();
+}
 
 pub fn insert_payload(data: model::ShortURL) -> Result<u64, postgres::Error> {
   let mut client = pg_client().unwrap();
