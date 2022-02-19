@@ -33,6 +33,6 @@ pub async fn find_origin_url(req: HttpRequest) -> Result<HttpResponse, actix_web
 }
 
 pub async fn migrate_db() -> Result<HttpResponse, actix_web::Error> {
-  db::create_db();
-  return Ok(println!("DB shortenurl has been created"));
+  db::create_db().unwrap();
+  return Ok(HttpResponse::Ok().body("Ok"));
 }
