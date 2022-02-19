@@ -6,6 +6,7 @@ Powerful and Fastest Short URL creator built in Rust
 Endpoint (POST): `https://marph.herokuapp.com/api/shortenurl`\
 Request Body (JSON):\
 - origin_url (String): https://... (Required),\
+- hashed_url (String): (Empty string - Required) 
 - custom_url (String): https://... (Required, if you don't want to have any custom URL just put "" ),\
 
 Return body (JSON):\
