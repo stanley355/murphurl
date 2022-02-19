@@ -14,7 +14,7 @@ impl ShortURL {
     let existing_url = get_url_by_origin(self.clone())?;
 
     if existing_url.len() > 0 {
-      self.hashed_url = existing_url.get(2);
+      self.hashed_url = existing_url[0].get(2);
     } else {
       insert_payload(self.clone())?;
     }
@@ -28,8 +28,8 @@ impl ShortURL {
     match existing_url.len() {
       0 => self.origin_url = "/".to_string(),
       _ => {
-        update_redirection_count(self.clone())?;
         self.origin_url = existing_url.get(1);
+        update_redirection_count(self.clone())?;
       }
     }
 

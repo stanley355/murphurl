@@ -1,4 +1,3 @@
-use actix_web::web;
 use openssl::ssl::{SslConnector, SslMethod, SslVerifyMode};
 use postgres::{Client, Error, Row};
 use postgres_openssl::MakeTlsConnector;
@@ -21,6 +20,8 @@ pub fn pg_client() -> Result<Box<Client>, Error> {
   return Ok(client);
 }
 
+
+
 pub fn insert_payload(data: model::ShortURL) -> Result<u64, postgres::Error> {
   let mut client = pg_client().unwrap();
   let query =
@@ -37,10 +38,10 @@ pub fn insert_payload(data: model::ShortURL) -> Result<u64, postgres::Error> {
   return Ok(result);
 }
 
-pub fn get_url_by_origin(data: model::ShortURL) -> Result<Row, Error> {
+pub fn get_url_by_origin(data: model::ShortURL) -> Result<Vec<Row>, Error> {
   let mut client = pg_client().unwrap();
   let query = Box::new("SELECT * FROM shortenurl WHERE origin_url = $1");
-  let result = client.query_one(*query, &[&data.origin_url])?;
+  let result = client.query(*query, &[&data.origin_url])?;
   client.close()?;
 
   return Ok(result);
@@ -60,7 +61,6 @@ pub fn update_redirection_count(data: model::ShortURL) -> Result<u64, Error> {
   let query = Box::new(
     "UPDATE shortenurl SET redirection_count = redirection_count + 1 WHERE origin_url = $1",
   );
-
   let result = client.execute(*query, &[&data.origin_url])?;
   client.close()?;
 

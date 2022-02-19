@@ -1,27 +1,8 @@
 use actix_web::{web, HttpRequest, HttpResponse, Result};
 
-use dotenv::dotenv;
-use std::env;
-
-use openssl::ssl::{SslConnector, SslMethod, SslVerifyMode};
-use postgres::Client;
-use postgres_openssl::MakeTlsConnector;
-
 mod model;
 mod utils;
 mod db;
-
-fn connect_pg() -> Result<Box<Client>, postgres::Error> {
-  dotenv().ok();
-
-  // Create Ssl postgres connector without verification as required to connect to Heroku.
-  let mut ssl = SslConnector::builder(SslMethod::tls()).unwrap();
-  ssl.set_verify(SslVerifyMode::NONE);
-  let tls = MakeTlsConnector::new(ssl.build());
-
-  let client = Box::new(Client::connect(&env::var("PG_URL").unwrap(), tls)?);
-  return Ok(client);
-}
 
 // Create shortened url
 pub async fn shorten_url(
