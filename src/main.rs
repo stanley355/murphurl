@@ -6,23 +6,19 @@ mod shorten;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenv().ok();
+  dotenv().ok();
 
-    let address = format!(
-        "{}:{}",
-        env::var("HOST").unwrap(),
-        &env::var("PORT").unwrap()
-    );
+  let host = &env::var("HOST").unwrap_or("127.0.0.1".to_string());
+  let port = &env::var("PORT").unwrap_or("8080".to_string());
+  let address = format!("{}:{}", host, port);
 
-    // to do: use app scope
-    HttpServer::new(|| {
-        App::new().service(
-            web::scope("/api")
-                .route("/v1", web::post().to(shorten::shorten_url)) //to create shorten URL
-                .route("/v1/{url}", web::get().to(shorten::find_redirect_url)), //to find origin URL
-        )
-    })
-    .bind(address)?
-    .run()
-    .await
+  HttpServer::new(|| {
+    App::new()
+      .route("/api/v1", web::post().to(shorten::shorten_url))
+      .route("/api/v1/{url}", web::get().to(shorten::find_origin_url))
+      .route("/api/v1/migrate", web::post().to(shorten::migrate_db))
+  })
+  .bind(address)?
+  .run()
+  .await
 }
