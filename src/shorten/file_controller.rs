@@ -9,11 +9,13 @@ pub async fn save_file(mut payload: Multipart) -> Option<bool> {
   let content_type = field.content_disposition().unwrap();
   let filename = format!("uploads/{}", content_type.get_filename()?);
 
+  // Just create filename without inserting the data
   // File::create is blocking operation, use threadpool
   let mut file = web::block(|| std::fs::File::create(filename))
     .await
     .unwrap();
 
+  // Inserts file data to the filename
   // Field in turn is stream of *Bytes* object
   let data_chunk = field.next().await.unwrap().unwrap();
   // filesystem operations are blocking, we have to use threadpool
