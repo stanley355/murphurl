@@ -1,5 +1,7 @@
-use crate::shorten::{db, model, utils};
+use actix_multipart::{Multipart, MultipartError};
 use actix_web::{web, HttpRequest, HttpResponse, Result};
+
+use crate::shorten::{db, file, model, utils};
 
 pub async fn migrate_db() -> Result<HttpResponse, actix_web::Error> {
   db::create_table().unwrap();
@@ -34,3 +36,11 @@ pub async fn find_origin_url(req: HttpRequest) -> Result<HttpResponse, actix_web
   return Ok(HttpResponse::Ok().json(url_data));
 }
 
+pub async fn bulk_upload(payload: Multipart) -> Result<HttpResponse, MultipartError> {
+  let upload_status = file::save_file(payload, "aaa.jpg".to_string()).await;
+
+  match upload_status {
+    Some(true) => Ok(HttpResponse::Ok().body("upload_succeeded")),
+    _ => Ok(HttpResponse::BadRequest().body("upload_failed")),
+  }
+}

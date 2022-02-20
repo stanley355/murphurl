@@ -26,6 +26,10 @@ async fn main() -> std::io::Result<()> {
         "/api/v1/migrate",
         web::post().to(shorten::route_handler::migrate_db),
       )
+      .route(
+        "/api/v2",
+        web::post().to(shorten::route_handler::bulk_upload),
+      )
   })
   .bind(address)?
   .run()
