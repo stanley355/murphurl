@@ -6,14 +6,14 @@ use actix_web::web;
 
 pub async fn save_file(mut payload: Multipart) -> Option<bool> {
   let mut field = payload.try_next().await.unwrap()?;
-  let content_type = field.content_disposition().unwrap();
+  let content_type = field.content_disposition()?;
   let filename = format!("uploads/{}", content_type.get_filename()?);
 
-  // Just create filename without inserting the data
+  // Create filename without inserting the data
   // File::create is blocking operation, use threadpool
   let mut file = web::block(|| std::fs::File::create(filename))
     .await
-    .unwrap();
+    .expect("Fail to create file");
 
   // Inserts file data to the filename
   // Field in turn is stream of *Bytes* object
@@ -21,7 +21,7 @@ pub async fn save_file(mut payload: Multipart) -> Option<bool> {
   // filesystem operations are blocking, we have to use threadpool
   web::block(move || file.write_all(&data_chunk).map(|_| file))
     .await
-    .unwrap();
+    .expect("Fail to insert file data");
 
   Some(true)
 }
