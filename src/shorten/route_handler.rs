@@ -37,7 +37,7 @@ pub async fn find_origin_url(req: HttpRequest) -> Result<HttpResponse, actix_web
 }
 
 pub async fn bulk_upload(payload: Multipart) -> Result<HttpResponse, MultipartError> {
-  let upload_status = file_controller::save_file(payload).await;
+  let upload_status = file_controller::ExcelFile::process_file(payload).await;
 
   match upload_status {
     Some(true) => Ok(HttpResponse::Ok().body("upload_succeeded")),
