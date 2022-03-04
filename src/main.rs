@@ -27,7 +27,7 @@ async fn main() -> std::io::Result<()> {
         web::post().to(shorten::route_handler::migrate_db),
       )
       .route(
-        "/api/v2",
+        "/api/v2/excel",
         web::post().to(shorten::route_handler::excel_bulk_upload),
       )
   })

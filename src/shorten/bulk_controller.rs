@@ -27,7 +27,7 @@ impl ExcelFile {
       .unwrap()
       .expect("Fail to find payload data");
     let content_type = field.content_disposition().unwrap();
-    let filename = format!("uploads/{:?}", content_type.get_filename());
+    let filename = format!("uploads/{}", content_type.get_filename().unwrap());
 
     self.clone().save_file(field, filename.clone()).await?;
 
