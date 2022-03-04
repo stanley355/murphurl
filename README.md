@@ -37,7 +37,8 @@ Request: {
 ```
 Instruction: 
 - Create an excel file with two columns 
-- Put img here stan
+![image](https://user-images.githubusercontent.com/53996155/156747848-b4e685e8-ceeb-4cb2-a6c8-fd9ffb0b959c.png)
+
 - The first column is the origin URL and the second column is the customized URL (empty it if unnecessary)
 - Send the excel file with Content-Type: multipart/form-data header
 
