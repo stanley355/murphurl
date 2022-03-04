@@ -1,5 +1,5 @@
-use crate::shorten::{db, model};
 use postgres::{Error, Row};
+use crate::shorten::{db, model};
 
 pub struct ShortURLController;
 

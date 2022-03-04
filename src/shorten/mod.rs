@@ -1,3 +1,4 @@
+pub mod bulk_controller;
 pub mod controller;
 pub mod db;
 pub mod model;

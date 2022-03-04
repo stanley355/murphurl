@@ -1,4 +1,5 @@
 use crate::shorten::controller::ShortURLController as Controller;
+use crate::shorten::utils::hash_url;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -34,5 +35,23 @@ impl ShortURL {
     }
 
     return Ok(Box::new(self));
+  }
+
+  pub fn bulk_hash(list: Vec<ShortURL>) -> Vec<Box<ShortURL>> {
+    let mut new_list: Vec<Box<ShortURL>> = vec![];
+    let mut count = 0;
+
+    while count < list.len() {
+      let mut short_url = list[count].clone();
+      short_url.hashed_url = hash_url(&short_url.origin_url);
+
+      let new_short_url = short_url.verify_and_hash();
+
+      new_list.push(new_short_url.unwrap());
+
+      count += 1;
+    }
+
+    return new_list;
   }
 }

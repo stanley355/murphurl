@@ -1,5 +1,12 @@
-use crate::shorten::{db, model, utils};
+use actix_multipart::{Multipart, MultipartError};
 use actix_web::{web, HttpRequest, HttpResponse, Result};
+
+use crate::shorten::{db, bulk_controller, model, utils};
+
+pub async fn migrate_db() -> Result<HttpResponse, actix_web::Error> {
+  db::create_table().unwrap();
+  return Ok(HttpResponse::Ok().body("Created table shortenurl"));
+}
 
 // Create shortened url
 pub async fn shorten_url(
@@ -29,7 +36,11 @@ pub async fn find_origin_url(req: HttpRequest) -> Result<HttpResponse, actix_web
   return Ok(HttpResponse::Ok().json(url_data));
 }
 
-pub async fn migrate_db() -> Result<HttpResponse, actix_web::Error> {
-  db::create_table().unwrap();
-  return Ok(HttpResponse::Ok().body("Created table shortenurl"));
+pub async fn excel_bulk_upload(payload: Multipart) -> Result<HttpResponse, MultipartError> {
+  let excel_file = bulk_controller::ExcelFile::new();
+  let file_data = excel_file.upload_and_read(payload).await.unwrap(); 
+
+  let url_list = model::ShortURL::bulk_hash(file_data);
+
+  return Ok(HttpResponse::Ok().json(url_list));
 }
