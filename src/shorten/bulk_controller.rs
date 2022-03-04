@@ -22,27 +22,34 @@ impl ExcelFile {
     mut payload: Multipart,
   ) -> Result<Vec<ShortURL>, MultipartError> {
     // Validate file
-    let field = payload
-      .try_next()
-      .await
-      .unwrap()
-      .expect("Fail to find payload data");
-    let content_type = field.content_disposition().unwrap();
+    let field = Box::new(
+      payload
+        .try_next()
+        .await
+        .unwrap()
+        .expect("Fail to find payload data"),
+    );
+    let content_type = Box::new(field.content_disposition().unwrap());
     let filename = format!("uploads/{}", content_type.get_filename().unwrap());
 
     self.clone().save_file(field, filename.clone()).await?;
 
     let url_list = self.collect_url(filename.clone()).await;
     fs::remove_file(filename).expect("Fail to remove file");
-    
     return Ok(url_list);
   }
 
-  pub async fn save_file(self, mut field: Field, filename: String) -> Result<(), MultipartError> {
+  pub async fn save_file(
+    self,
+    mut field: Box<Field>,
+    filename: String,
+  ) -> Result<(), MultipartError> {
     // Create file without inserting the data
-    let mut file = web::block(|| std::fs::File::create(filename))
-      .await
-      .expect("Fail to create file");
+    let mut file = Box::new(
+      web::block(|| std::fs::File::create(filename))
+        .await
+        .expect("Fail to create file"),
+    );
     // Inserts file data to the filename
     let data_chunk = field.next().await.unwrap();
     web::block(|| file.write_all(&data_chunk.unwrap()).map(|_| file))
@@ -54,8 +61,8 @@ impl ExcelFile {
 
   pub async fn collect_url(self, path: String) -> Vec<ShortURL> {
     // sheet reader
-    let mut excel = Excel::open(path.clone()).expect("Fail to find workbook");
-    let sheet_reader = excel.worksheet_range("Sheet1").unwrap();
+    let mut excel = Box::new(Excel::open(path.clone()).expect("Fail to find workbook"));
+    let sheet_reader = Box::new(excel.worksheet_range("Sheet1").unwrap());
 
     // Loop over excel and push the url into vec
     let mut url_list: Vec<ShortURL> = vec![];

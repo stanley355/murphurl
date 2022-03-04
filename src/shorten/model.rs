@@ -10,6 +10,14 @@ pub struct ShortURL {
 }
 
 impl ShortURL {
+  pub fn new() -> Self {
+    Self {
+      origin_url: "".to_string(),
+      hashed_url: "".to_string(),
+      custom_url: "".to_string(),
+    }
+  }
+
   // Check if url exist in db, if not insert new one
   pub fn verify_and_hash(mut self) -> Result<Box<ShortURL>, postgres::Error> {
     let existing_url = Controller::get_url_by_origin(self.clone())?;
@@ -35,6 +43,31 @@ impl ShortURL {
     }
 
     return Ok(Box::new(self));
+  }
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct BulkShortURL {
+  pub url_list: Vec<String>
+}
+
+impl BulkShortURL {
+  pub fn new(list: Vec<String>) -> Self {
+    Self {
+      url_list: list
+    }
+  }
+
+  pub fn collect_and_hash(self) -> Vec<Box<ShortURL>> {
+    let mut shorturl_list: Vec<ShortURL> = vec![];
+    for url in self.url_list {
+      let mut short_url = ShortURL::new();
+      short_url.origin_url = url;
+
+      shorturl_list.push(short_url)
+    }
+
+    return BulkShortURL::bulk_hash(shorturl_list);
   }
 
   pub fn bulk_hash(list: Vec<ShortURL>) -> Vec<Box<ShortURL>> {
