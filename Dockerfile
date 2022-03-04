@@ -7,7 +7,5 @@ COPY ./ ./
 # Build your program for release
 RUN cargo build --release --all-features
 
-RUN ls
-
 # Run the binary
-CMD ["./target/release/shortenurl && "]
+CMD ["mkdir uploads && ./target/release/shortenurl"]
