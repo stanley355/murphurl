@@ -3,6 +3,7 @@ use actix_web::web;
 
 use futures::{StreamExt, TryStreamExt};
 use office::{DataType, Excel};
+use std::fs;
 use std::io::Write;
 
 use crate::shorten::model::ShortURL;
@@ -31,7 +32,9 @@ impl ExcelFile {
 
     self.clone().save_file(field, filename.clone()).await?;
 
-    let url_list = self.collect_url(filename).await;
+    let url_list = self.collect_url(filename.clone()).await;
+    fs::remove_file(filename).expect("Fail to remove file");
+    
     return Ok(url_list);
   }
 
