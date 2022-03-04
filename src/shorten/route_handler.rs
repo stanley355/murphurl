@@ -1,7 +1,7 @@
 use actix_multipart::{Multipart, MultipartError};
 use actix_web::{web, HttpRequest, HttpResponse, Result};
 
-use crate::shorten::{db, file_controller, model, utils};
+use crate::shorten::{db, bulk_controller, model, utils};
 
 pub async fn migrate_db() -> Result<HttpResponse, actix_web::Error> {
   db::create_table().unwrap();
@@ -36,11 +36,11 @@ pub async fn find_origin_url(req: HttpRequest) -> Result<HttpResponse, actix_web
   return Ok(HttpResponse::Ok().json(url_data));
 }
 
-pub async fn bulk_upload(payload: Multipart) -> Result<HttpResponse, MultipartError> {
-  let upload_status = file_controller::ExcelFile::process_file(payload).await;
+pub async fn excel_bulk_upload(payload: Multipart) -> Result<HttpResponse, MultipartError> {
+  let excel_file = bulk_controller::ExcelFile::new();
+  let file_data = excel_file.upload_and_read(payload).await.unwrap(); 
 
-  match upload_status {
-    Some(true) => Ok(HttpResponse::Ok().body("upload_succeeded")),
-    _ => Ok(HttpResponse::BadRequest().body("upload_failed")),
-  }
+  let url_list = model::ShortURL::bulk_hash(file_data);
+
+  return Ok(HttpResponse::Ok().json(url_list));
 }

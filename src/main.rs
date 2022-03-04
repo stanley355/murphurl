@@ -28,7 +28,7 @@ async fn main() -> std::io::Result<()> {
       )
       .route(
         "/api/v2",
-        web::post().to(shorten::route_handler::bulk_upload),
+        web::post().to(shorten::route_handler::excel_bulk_upload),
       )
   })
   .bind(address)?
