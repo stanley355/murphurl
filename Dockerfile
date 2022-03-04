@@ -10,4 +10,4 @@ RUN cargo build --release --all-features
 RUN ls
 
 # Run the binary
-CMD ["./target/release/shortenurl && mkdir uploads"]
+CMD ["./target/release/shortenurl && "]
