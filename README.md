@@ -1,24 +1,45 @@
-# Shorten URL
-Powerful and Fastest Short URL creator built in Rust
+# Morph URL
+Free URL shortener API to create perfect URLs for your business. MorphURL helps you create and share branded links with custom domains at scale. ✓ Check it out!
 
-## Docs
-1. To create shortened URL:\
-Endpoint (POST): `https://morphurl.herokuapp.com/api/v1`\
-Request Body (JSON):\
-- origin_url (String): https://... (Required),\
-- hashed_url (String): (Empty string - Required) 
-- custom_url (String): https://... (Required, if you don't want to have any custom URL just put "" ),\
 
-Return body (JSON):\
--  origin_url (String): https://...
--  hashed_url (String): [Some Hashed URL] (If you put custom_url, the hashed_url will return ""),
--  custom_url (String): [Your Custom URL] (If you didn't put any custom_url, the custom_url will return ""),
+## How to
+This API will shortenized your URL and return the shortened (hashed) or customized URL, you can fire the API directly through REST server or even shortenized a lot of URL in one go using Excel Uploads! (See API no 4) 
 
-2. To find the origin URL from hashed or custom URL:
-Endpoint (GET): `https://morphurl.herokuapp.com/api/v1/{url}` where `{url}` is the hashed or custom URL\
-Return body (JSON):\
--  origin_url (String): https://[The origin URL]
--  hashed_url (String): [Some Hashed URL] (If you put custom_url, the hashed_url will return ""),
--  custom_url (String): [Your Custom URL] (If you didn't put any custom_url, the custom_url will return ""),
+The current development is used for backend only, the next README update will include redirection functionality!
 
-`Notes: Your origin_url should have http or https, invalid URL will return "" in hashed or custom URL`
+
+## APIs
+### 1. Shortenize Single URL: `https://morphurl.herokuapp.com/api/v1` (POST)
+```
+Request (all required): {
+  origin_url (String): https://... ,
+  hashed_url (String): "",
+  custom_url (String): https://... , (If you don't want to have any custom URL just put "" )
+}
+
+* Will return response with similar body
+```
+
+### 2. Find the origin of the shortenized URL: `https://morphurl.herokuapp.com/api/v1/{hashed_url}` (GET)
+The `{hashed_url}` is the hashed_url object keys from the `/api/v1` response \
+*Will return response with its origin_url + customized_url (if exist)
+
+### 3. Shortenized Array URL: `https://morphurl.herokuapp.com/api/v2` (POST)
+```
+Request: {
+  url_list (Array of String): ["https://... ", "https://... ", ...]
+}
+
+* Will return an Array of Objects with origin, hashed, and customized URL
+```
+
+### 4. Shortenized URL via Excel: `https://morphurl.herokuapp.com/api/v2/excel` (POST)
+```
+Instruction: 
+- Create an excel file with two columns 
+- Put img here stan
+- The first column is the origin URL and the second column is the customized URL (empty it if unnecessary)
+- Send the excel file with Content-Type: multipart/form-data header
+
+* Will return an Array of Objects with origin, hashed, and customized URL
+```
