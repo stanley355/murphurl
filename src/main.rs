@@ -14,9 +14,26 @@ async fn main() -> std::io::Result<()> {
 
   HttpServer::new(|| {
     App::new()
-      .route("/api/v1", web::post().to(shorten::shorten_url))
-      .route("/api/v1/{url}", web::get().to(shorten::find_origin_url))
-      .route("/api/v1/migrate", web::post().to(shorten::migrate_db))
+      .route(
+        "/api/v1",
+        web::post().to(shorten::route_handler::shorten_url),
+      )
+      .route(
+        "/api/v1/{url}",
+        web::get().to(shorten::route_handler::find_origin_url),
+      )
+      .route(
+        "/api/v1/migrate",
+        web::post().to(shorten::route_handler::migrate_db),
+      )
+      .route(
+        "/api/v2",
+        web::post().to(shorten::route_handler::bulk_upload),
+      )
+      .route(
+        "/api/v2/excel",
+        web::post().to(shorten::route_handler::excel_bulk_upload),
+      )
   })
   .bind(address)?
   .run()
