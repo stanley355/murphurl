@@ -30,10 +30,6 @@ async fn main() -> std::io::Result<()> {
         "/api/v2",
         web::post().to(shorten::route_handler::bulk_upload),
       )
-      .route(
-        "/api/v2/excel",
-        web::post().to(shorten::route_handler::excel_bulk_upload),
-      )
   })
   .bind(address)?
   .run()

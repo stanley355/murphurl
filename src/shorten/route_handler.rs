@@ -1,7 +1,6 @@
-use actix_multipart::{Multipart, MultipartError};
 use actix_web::{web, HttpRequest, HttpResponse, Result};
 
-use crate::shorten::{db, bulk_controller, model, utils};
+use crate::shorten::{db, model, utils};
 
 pub async fn migrate_db() -> Result<HttpResponse, actix_web::Error> {
   db::create_table().unwrap();
@@ -36,18 +35,12 @@ pub async fn find_origin_url(req: HttpRequest) -> Result<HttpResponse, actix_web
   return Ok(HttpResponse::Ok().json(url_data));
 }
 
-pub async fn bulk_upload(req: web::Json<model::BulkShortURL>) -> Result<HttpResponse, actix_web::Error> {
-  let bulk_url = model::BulkShortURL::new(req.url_list.clone());
-  let short_url_list = bulk_url.collect_and_hash(); //convert from string and hash
-  
+pub async fn bulk_upload(
+  req: web::Json<model::BulkShortURL>,
+) -> Result<HttpResponse, actix_web::Error> {
+  let bulk_shorturl = model::BulkShortURL {
+    shorturl_list: req.shorturl_list.clone(),
+  };
+  let short_url_list = bulk_shorturl.bulk_hash();
   return Ok(HttpResponse::Ok().json(short_url_list));
-}
-
-pub async fn excel_bulk_upload(payload: Multipart) -> Result<HttpResponse, MultipartError> {
-  let excel_file = bulk_controller::ExcelFile::new();
-  let file_data = excel_file.upload_and_read(payload).await.unwrap(); 
-
-  let url_list = model::BulkShortURL::bulk_hash(file_data);
-
-  return Ok(HttpResponse::Ok().json(url_list));
 }
