@@ -14,7 +14,7 @@ The current development is used for backend only, the next README update will in
 Request (all required): {
   origin_url (String): https://... ,
   hashed_url (String): "",
-  custom_url (String): https://... , (If you don't want to have any custom URL just put "" )
+  custom_url (String): "any custom string", (If you don't want to have any custom URL just put "" )
 }
 
 * Will return response with similar body
@@ -24,10 +24,26 @@ Request (all required): {
 The `{hashed_url}` is the hashed_url object keys from the `/api/v1` response \
 *Will return response with its origin_url + customized_url (if exist)
 
-### 3. Shortenized Array URL: `https://morphurl.herokuapp.com/api/v2` (POST)
+### 3. Shortenized an array of URL: `https://morphurl.herokuapp.com/api/v2` (POST)
 ```
 Request: {
-  url_list (Array of String): ["https://... ", "https://... ", ...]
+  shorturl_list (Array of String): [
+    {
+      origin_url (String): https://... ,
+      hashed_url (String): "",
+      custom_url (String): "Any custom string", 
+    },
+    {
+      origin_url (String): https://... ,
+      hashed_url (String): "",
+      custom_url (String): "Any custom string", 
+    },
+    {
+      origin_url (String): https://... ,
+      hashed_url (String): "",
+      custom_url (String): "Any custom string", 
+    },
+  ]
 }
 
 * Will return an Array of Objects with origin, hashed, and customized URL
