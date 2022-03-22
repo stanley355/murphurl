@@ -12,22 +12,21 @@ pub struct ShortURL {
 }
 
 impl ShortURL {
-  // Check if url exist in db, if not insert new one
   pub fn verify_and_hash(mut self) -> Result<ShortURL, Error> {
     self.hashed_url = hash_url(&self.origin_url);
-    let existing_url = Controller::get_url_by_origin(self.clone()).unwrap();
+    let existing_url = Controller::get_hashed_url(self.clone()).unwrap();
 
     if existing_url.len() > 0 {
       self.hashed_url = existing_url[0].get(2);
     } else {
-      Controller::insert_payload(self.clone()).unwrap();
+      Controller::insert_url_data(self.clone()).unwrap();
     }
 
     return Ok(self);
   }
 
-  pub fn fetch_origin(mut self) -> Result<ShortURL, Error> {
-    let existing_url = Controller::get_source_url(self.clone()).unwrap();
+  pub fn get_origin_url(mut self) -> Result<ShortURL, Error> {
+    let existing_url = Controller::get_origin_url(self.clone()).unwrap();
 
     match existing_url.len() {
       0 => self.origin_url = "/".to_string(),

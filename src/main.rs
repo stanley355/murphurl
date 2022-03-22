@@ -20,7 +20,7 @@ async fn main() -> std::io::Result<()> {
       )
       .route(
         "/api/v1/{url}",
-        web::get().to(shorten::route_handler::find_origin_url),
+        web::get().to(shorten::route_handler::find_redirect_url),
       )
       .route(
         "/api/v1/migrate",

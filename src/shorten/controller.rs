@@ -4,7 +4,7 @@ use crate::shorten::{db, model};
 pub struct ShortURLController;
 
 impl ShortURLController {
-  pub fn insert_payload(data: model::ShortURL) -> Result<u64, Error> {
+  pub fn insert_url_data(data: model::ShortURL) -> Result<u64, Error> {
     let mut client = db::pg_client().unwrap();
     let query =
       Box::new("INSERT INTO shortenurl (origin_url, hashed_url, custom_url) VALUES ($1, $2, $3)");
@@ -20,7 +20,7 @@ impl ShortURLController {
     return Ok(result);
   }
 
-  pub fn get_url_by_origin(data: model::ShortURL) -> Result<Vec<Row>, Error> {
+  pub fn get_hashed_url(data: model::ShortURL) -> Result<Vec<Row>, Error> {
     let mut client = db::pg_client().unwrap();
     let query = Box::new("SELECT * FROM shortenurl WHERE origin_url = $1");
     let result = client.query(*query, &[&data.origin_url])?;
@@ -29,7 +29,7 @@ impl ShortURLController {
     return Ok(result);
   }
 
-  pub fn get_source_url(data: model::ShortURL) -> Result<Row, Error> {
+  pub fn get_origin_url(data: model::ShortURL) -> Result<Row, Error> {
     let mut client = db::pg_client().unwrap();
     let query = Box::new("SELECT * FROM shortenurl WHERE hashed_url = $1 OR custom_url = $2");
     let result = client.query_one(*query, &[&data.hashed_url, &data.custom_url])?;
