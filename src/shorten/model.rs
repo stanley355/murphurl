@@ -14,25 +14,25 @@ pub struct ShortURL {
 impl ShortURL {
   pub fn verify_and_hash(mut self) -> Result<ShortURL, Error> {
     self.hashed_url = hash_url(&self.origin_url);
-    let existing_url = Controller::get_hashed_url(self.clone()).unwrap();
+    let existing_url = Controller::get_hashed_url(self.clone()).expect("Fail to get hashed_url");
 
     if existing_url.len() > 0 {
       self.hashed_url = existing_url[0].get(2);
     } else {
-      Controller::insert_url_data(self.clone()).unwrap();
+      Controller::insert_url_data(self.clone()).expect("Fail to insert URL data");
     }
 
     return Ok(self);
   }
 
   pub fn get_origin_url(mut self) -> Result<ShortURL, Error> {
-    let existing_url = Controller::get_origin_url(self.clone()).unwrap();
+    let existing_url = Controller::get_origin_url(self.clone()).expect("Fail to get origin_url");
 
     match existing_url.len() {
       0 => self.origin_url = "/".to_string(),
       _ => {
         self.origin_url = existing_url.get(1);
-        Controller::update_redirection_count(self.clone()).unwrap();
+        Controller::update_redirection_count(self.clone()).expect("Fail to update redirection count");
       }
     }
 
