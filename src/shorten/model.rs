@@ -1,5 +1,7 @@
 use crate::shorten::controller::ShortURLController as Controller;
 use crate::shorten::utils::hash_url;
+
+use actix_web::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -11,36 +13,37 @@ pub struct ShortURL {
 
 impl ShortURL {
   // Check if url exist in db, if not insert new one
-  pub fn verify_and_hash(mut self) -> Result<ShortURL, postgres::Error> {
-    let existing_url = Controller::get_url_by_origin(self.clone())?;
+  pub fn verify_and_hash(mut self) -> Result<ShortURL, Error> {
+    self.hashed_url = hash_url(&self.origin_url);
+    let existing_url = Controller::get_url_by_origin(self.clone()).unwrap();
 
     if existing_url.len() > 0 {
       self.hashed_url = existing_url[0].get(2);
     } else {
-      Controller::insert_payload(self.clone())?;
+      Controller::insert_payload(self.clone()).unwrap();
     }
 
     return Ok(self);
   }
 
-  pub fn fetch_origin(mut self) -> Result<Box<ShortURL>, postgres::Error> {
-    let existing_url = Controller::get_source_url(self.clone())?;
+  pub fn fetch_origin(mut self) -> Result<ShortURL, Error> {
+    let existing_url = Controller::get_source_url(self.clone()).unwrap();
 
     match existing_url.len() {
       0 => self.origin_url = "/".to_string(),
       _ => {
         self.origin_url = existing_url.get(1);
-        Controller::update_redirection_count(self.clone())?;
+        Controller::update_redirection_count(self.clone()).unwrap();
       }
     }
 
-    return Ok(Box::new(self));
+    return Ok(self);
   }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct BulkShortURL {
-  pub shorturl_list: Vec<ShortURL>
+  pub shorturl_list: Vec<ShortURL>,
 }
 
 impl BulkShortURL {
