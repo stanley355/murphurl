@@ -1,16 +1,14 @@
-use actix_web::{web, HttpRequest, HttpResponse, Result};
+use actix_web::{web, Error, HttpRequest, HttpResponse, Result};
 
 use crate::shorten::{db, model};
 
-pub async fn migrate_db() -> Result<HttpResponse, actix_web::Error> {
-  db::create_table().unwrap();
+pub async fn migrate_db() -> Result<HttpResponse, Error> {
+  db::create_shortenurl_table().unwrap();
   return Ok(HttpResponse::Ok().body("Created table shortenurl"));
 }
 
 // Create shortened url
-pub async fn shorten_url(
-  req: web::Json<model::ShortURL>,
-) -> Result<HttpResponse, actix_web::Error> {
+pub async fn shorten_url(req: web::Json<model::ShortURL>) -> Result<HttpResponse, Error> {
   let short_url = model::ShortURL {
     origin_url: req.origin_url.clone(),
     hashed_url: "".to_string(),
@@ -22,7 +20,7 @@ pub async fn shorten_url(
   return Ok(HttpResponse::Ok().json(url_data));
 }
 
-pub async fn find_redirect_url(req: HttpRequest) -> Result<HttpResponse, actix_web::Error> {
+pub async fn find_redirect_url(req: HttpRequest) -> Result<HttpResponse, Error> {
   let url_param = req.match_info().get("url");
   let short_url = model::ShortURL {
     origin_url: "".to_string(),
@@ -35,9 +33,7 @@ pub async fn find_redirect_url(req: HttpRequest) -> Result<HttpResponse, actix_w
   return Ok(HttpResponse::Ok().json(url_data));
 }
 
-pub async fn bulk_upload(
-  req: web::Json<model::BulkShortURL>,
-) -> Result<HttpResponse, actix_web::Error> {
+pub async fn bulk_upload(req: web::Json<model::BulkShortURL>) -> Result<HttpResponse, Error> {
   let bulk_shorturl = model::BulkShortURL {
     shorturl_list: req.shorturl_list.clone(),
   };

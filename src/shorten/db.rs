@@ -18,7 +18,7 @@ pub fn pg_client() -> Result<Box<Client>, Error> {
   return Ok(client);
 }
 
-pub fn create_table() -> Result<(), Error> {
+pub fn create_shortenurl_table() -> Result<(), Error> {
   let mut client = pg_client()?;
   let query = Box::new(
     "CREATE TABLE IF NOT EXISTS shortenurl (
