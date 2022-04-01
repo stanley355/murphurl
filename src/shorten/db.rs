@@ -14,12 +14,12 @@ pub fn pg_client() -> Result<Box<Client>, Error> {
   ssl.set_verify(SslVerifyMode::NONE);
   let tls = MakeTlsConnector::new(ssl.build());
 
-  let client = Box::new(Client::connect(&pg_url, tls)?);
+  let client = Box::new(Client::connect(&pg_url, tls).expect("Fail to connect to PG Client"));
   return Ok(client);
 }
 
-pub fn create_table() -> Result<(), Error> {
-  let mut client = pg_client().unwrap();
+pub fn create_shortenurl_table() -> Result<(), Error> {
+  let mut client = pg_client()?;
   let query = Box::new(
     "CREATE TABLE IF NOT EXISTS shortenurl (
       id SERIAL PRIMARY kEY,
@@ -30,8 +30,8 @@ pub fn create_table() -> Result<(), Error> {
   );",
   );
 
-  client.batch_execute(*query).expect("Fail to create DB");
-  client.close().unwrap();
+  client.batch_execute(*query).expect("Fail to create table: shortenurl");
+  client.close()?;
 
   return Ok(());
 }
